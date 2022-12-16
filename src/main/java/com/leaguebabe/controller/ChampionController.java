@@ -14,22 +14,22 @@ public class ChampionController {
     @Autowired
     private ChampionDelegator championDelegator;
 
-    @GetMapping("/")
+    @GetMapping(path = "/")
     public ResponseEntity<String> home(){
         return ResponseEntity.ok().body("THIS IS HOME");
     }
 
-    @GetMapping("/champions")
+    @GetMapping(path = "/champions")
     public ResponseEntity<Collection<Champion>> getAllChampions(){
         return championDelegator.getAllChampions();
     }
 
-    @GetMapping("champion/{name}")
+    @GetMapping(path = "champion/{name}")
     public ResponseEntity<String> championUrl(@PathVariable String name){
         return championDelegator.getProfilePictureByChampionName(name);
     }
 
-    @PostMapping(value = "champion", consumes = "application/json")
+    @PostMapping(path = "champion", consumes = "application/json")
     public ResponseEntity<String> saveChampion(@RequestBody Champion championToSave){
         return championDelegator.saveChampion(championToSave);
     }
