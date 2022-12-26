@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class ChampionDelegator implements ServiceDelegator{
+public class ChampionDelegator implements ServiceDelegator {
 
     @Autowired
     private ChampionRepo championRepo;
@@ -49,5 +49,17 @@ public class ChampionDelegator implements ServiceDelegator{
     public ResponseEntity<String> saveChampion(Champion champion){
         championRepo.save(champion);
         return ResponseEntity.ok().body("Champion with name" + champion.getName() + " saved");
+    }
+
+    @Transactional
+    public ResponseEntity<String> deleteChampion(String championName){
+        Champion championToDelete =  championRepo.findByName(championName);
+
+        if(championToDelete.getName().isEmpty()){
+            logger.warn("No champion with name" + championName + " was found.");
+            return ResponseEntity.noContent().build();
+        }
+        championRepo.delete(championToDelete);
+        return ResponseEntity.ok().body("Deleted champion with name: " + championName);
     }
 }

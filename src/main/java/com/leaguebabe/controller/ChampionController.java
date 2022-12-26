@@ -33,4 +33,9 @@ public class ChampionController {
     public ResponseEntity<String> saveChampion(@RequestBody Champion championToSave){
         return championDelegator.saveChampion(championToSave);
     }
+
+    @DeleteMapping(path = "champion/{name}")
+    public ResponseEntity<String> deleteChampion(@PathVariable String name){
+        return championDelegator.deleteChampion(name);
+    }
 }
