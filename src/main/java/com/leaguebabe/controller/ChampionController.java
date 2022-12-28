@@ -34,6 +34,11 @@ public class ChampionController {
         return championDelegator.saveChampion(championToSave);
     }
 
+    @PostMapping(path = "champion/{name}", consumes = "application/json")
+    public ResponseEntity<Champion> updateChampion(@PathVariable String name, @RequestBody Champion championToUpdate){
+        return championDelegator.updateChampion(championToUpdate);
+    }
+
     @DeleteMapping(path = "champion/{name}")
     public ResponseEntity<String> deleteChampion(@PathVariable String name){
         return championDelegator.deleteChampion(name);

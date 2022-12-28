@@ -52,6 +52,19 @@ public class ChampionDelegator implements ServiceDelegator {
     }
 
     @Transactional
+    public ResponseEntity<Champion> updateChampion(Champion champion){
+        logger.info("Updating champion with name" + champion.getName());
+        Champion championToUpdate = championRepo.findByName(champion.getName());
+        if(champion.getProfilePictureUrl().isEmpty()){
+            logger.warn("No profile picture url provided");
+            return ResponseEntity.noContent().build();
+        }
+        championToUpdate.setProfilePictureUrl(champion.getProfilePictureUrl());
+        championRepo.save(championToUpdate);
+        return ResponseEntity.ok().body(championToUpdate);
+    }
+
+    @Transactional
     public ResponseEntity<String> deleteChampion(String championName){
         Champion championToDelete =  championRepo.findByName(championName);
 
