@@ -47,8 +47,15 @@ public class ChampionDelegator implements ServiceDelegator {
 
     @Transactional
     public ResponseEntity<String> saveChampion(Champion champion){
-        championRepo.save(champion);
-        return ResponseEntity.ok().body("Champion with name" + champion.getName() + " saved");
+        logger.info("Saving champion with name " + champion.getName());
+        try{
+            championRepo.save(champion);
+            return ResponseEntity.ok().body("Champion saved");
+        }
+        catch (Exception e){
+            logger.warn("Champion not saved");
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @Transactional
