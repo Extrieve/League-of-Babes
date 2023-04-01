@@ -11,13 +11,11 @@ import lombok.*;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class Champion {
+public class Leaderboard {
 
     @Id
     private String id;
     private String name;
-    private String title;
-    private String blurb;
     private String imageUrl;
-    private String[] tags;
+    private int score;
 }
