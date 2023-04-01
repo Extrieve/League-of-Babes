@@ -3,6 +3,7 @@ package com.leaguebabe.service;
 import com.leaguebabe.entity.Champion;
 import com.leaguebabe.repository.ChampionRepo;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,9 @@ import java.util.List;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class ChampionDelegator implements ServiceDelegator {
 
-    @Autowired
     private ChampionRepo championRepo;
 
     Logger logger = org.slf4j.LoggerFactory.getLogger(ChampionDelegator.class);
