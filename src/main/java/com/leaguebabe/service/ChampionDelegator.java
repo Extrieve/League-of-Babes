@@ -37,7 +37,7 @@ public class ChampionDelegator implements ServiceDelegator {
 
         try{
             Champion champion = championRepo.findByName(championName);
-            return ResponseEntity.ok().body(champion.getProfilePictureUrl());
+            return ResponseEntity.ok().body(champion.getImageUrl());
         }
         catch (Exception e){
             logger.warn("Champion not found");
@@ -62,11 +62,11 @@ public class ChampionDelegator implements ServiceDelegator {
     public ResponseEntity<Champion> updateChampion(Champion champion){
         logger.info("Updating champion with name" + champion.getName());
         Champion championToUpdate = championRepo.findByName(champion.getName());
-        if(champion.getProfilePictureUrl().isEmpty()){
+        if(champion.getImageUrl().isEmpty()){
             logger.warn("No profile picture url provided");
             return ResponseEntity.noContent().build();
         }
-        championToUpdate.setProfilePictureUrl(champion.getProfilePictureUrl());
+        championToUpdate.setImageUrl(champion.getImageUrl());
         championRepo.save(championToUpdate);
         return ResponseEntity.ok().body(championToUpdate);
     }
