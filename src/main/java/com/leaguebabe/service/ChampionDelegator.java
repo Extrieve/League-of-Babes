@@ -4,6 +4,7 @@ import com.leaguebabe.entity.Champion;
 import com.leaguebabe.repository.ChampionRepo;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,10 @@ import java.util.List;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ChampionDelegator implements ServiceDelegator {
 
-    private ChampionRepo championRepo;
+    private final ChampionRepo championRepo;
 
     public ResponseEntity<Collection<Champion>> getAllChampions(){
         log.info("Getting all champions");
