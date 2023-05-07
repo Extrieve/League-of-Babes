@@ -3,11 +3,10 @@ package com.leaguebabe.service;
 import com.leaguebabe.entity.Champion;
 import com.leaguebabe.repository.ChampionRepo;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +16,8 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 public class ChampionDelegator implements ServiceDelegator {
 
     private final ChampionRepo championRepo;
@@ -62,13 +63,19 @@ public class ChampionDelegator implements ServiceDelegator {
     public ResponseEntity<Champion> updateChampion(Champion champion){
         log.info("Updating champion with name" + champion.getName());
         Champion championToUpdate = championRepo.findByName(champion.getName());
-        if(champion.getImageUrl().isEmpty()){
-            log.warn("No profile picture url provided");
-            return ResponseEntity.noContent().build();
+        if (championToUpdate.getName().isEmpty()){
+            log.info("Champion not found, creating new champion");
+            championRepo.save(champion);
         }
-        championToUpdate.setImageUrl(champion.getImageUrl());
-        championRepo.save(championToUpdate);
-        return ResponseEntity.ok().body(championToUpdate);
+        try{
+            championToUpdate.setImageUrl(champion.getImageUrl());
+            championRepo.save(championToUpdate);
+            return ResponseEntity.ok().body(championToUpdate);
+        }
+        catch (Exception e){
+            log.warn("Champion not updated");
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @Transactional
