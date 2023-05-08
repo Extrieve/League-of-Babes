@@ -10,6 +10,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class ChampionDelegator implements ServiceDelegator {
 
         try{
             Champion champion = championRepo.findByName(championName);
-            return ResponseEntity.ok().body(champion.getImageUrl());
+            return ResponseEntity.ok().body(champion.getProfilePictureUrl());
         }
         catch (Exception e){
             log.warn("Champion not found");
@@ -60,17 +61,24 @@ public class ChampionDelegator implements ServiceDelegator {
     }
 
     @Transactional
-    public ResponseEntity<Champion> updateChampion(Champion champion){
-        log.info("Updating champion with name" + champion.getName());
-        Champion championToUpdate = championRepo.findByName(champion.getName());
+    public ResponseEntity<Champion> updateChampion(Champion champion, String championName){
+        log.info("Updating champion with name " + championName);
+        Champion championToUpdate = championRepo.findByName(championName);
         if (championToUpdate.getName().isEmpty()){
             log.info("Champion not found, creating new champion");
             championRepo.save(champion);
         }
         try{
-            championToUpdate.setImageUrl(champion.getImageUrl());
+            // Loop through the fields in the champion object if not null, update the championToUpdate object
+            for (Field field : Champion.class.getDeclaredFields()) {
+                field.setAccessible(true);
+                Object value = field.get(champion);
+                if (value != null) {
+                    field.set(championToUpdate, value);
+                }
+            }
             championRepo.save(championToUpdate);
-            return ResponseEntity.ok().body(championToUpdate);
+            return ResponseEntity.ok(championToUpdate);
         }
         catch (Exception e){
             log.warn("Champion not updated");
