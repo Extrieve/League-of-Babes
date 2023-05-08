@@ -14,10 +14,9 @@ import lombok.*;
 public class Champion {
 
     @Id
-    private String id;
     private String name;
     private String title;
     private String blurb;
-    private String imageUrl;
+    private String profilePictureUrl;
     private String[] tags;
 }
