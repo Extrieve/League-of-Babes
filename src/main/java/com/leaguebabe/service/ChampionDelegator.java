@@ -7,12 +7,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.beans.FeatureDescriptor;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -22,6 +28,14 @@ import java.util.List;
 public class ChampionDelegator implements ServiceDelegator {
 
     private final ChampionRepo championRepo;
+
+    private static String[] getNullPropertyNames(Object source) {
+        final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
+        return Stream.of(wrappedSource.getPropertyDescriptors())
+                .map(FeatureDescriptor::getName)
+                .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
+                .toArray(String[]::new);
+    }
 
     public ResponseEntity<Collection<Champion>> getAllChampions(){
         log.info("Getting all champions");
@@ -61,28 +75,25 @@ public class ChampionDelegator implements ServiceDelegator {
     }
 
     @Transactional
-    public ResponseEntity<Champion> updateChampion(Champion champion, String championName){
+    public ResponseEntity<Champion> updateChampion(Champion champion, String championName) {
         log.info("Updating champion with name " + championName);
         Champion championToUpdate = championRepo.findByName(championName);
-        if (championToUpdate.getName().isEmpty()){
+
+        if (championToUpdate == null) {
             log.info("Champion not found, creating new champion");
-            championRepo.save(champion);
+            Champion newChampion = championRepo.save(champion);
+            return new ResponseEntity<>(newChampion, HttpStatus.CREATED);
         }
-        try{
-            // Loop through the fields in the champion object if not null, update the championToUpdate object
-            for (Field field : Champion.class.getDeclaredFields()) {
-                field.setAccessible(true);
-                Object value = field.get(champion);
-                if (value != null) {
-                    field.set(championToUpdate, value);
-                }
-            }
+
+        try {
+            // Copy non-null properties from the champion object to the championToUpdate object
+            BeanUtils.copyProperties(champion, championToUpdate, getNullPropertyNames(champion));
+
             championRepo.save(championToUpdate);
             return ResponseEntity.ok(championToUpdate);
-        }
-        catch (Exception e){
-            log.warn("Champion not updated");
-            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            log.warn("Champion not updated", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
